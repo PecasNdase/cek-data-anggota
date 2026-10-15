@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="id" class="h-full bg-slate-900">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Verifikasi Anggota & Kartu Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -34,60 +37,83 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .perspective-1000 {
             perspective: 1000px;
         }
+
         .transform-style-3d {
             transform-style: preserve-3d;
         }
+
         .backface-hidden {
             backface-visibility: hidden;
         }
+
         .rotate-y-180 {
             transform: rotateY(180deg);
         }
+
         .card-flip-inner {
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+
         .card-flipped {
             transform: rotateY(180deg);
         }
+
         @keyframes pulseGlow {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.8; }
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
         }
+
         .animate-pulse-glow {
             animation: pulseGlow 3s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="h-full text-slate-100 antialiased bg-slate-950 selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
+
+<body
+    class="h-full text-slate-100 antialiased bg-slate-950 selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
 
     <!-- Background Decoration -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl animate-pulse-glow"></div>
-        <div class="absolute top-1/2 -left-40 w-96 h-96 bg-cyan-600/15 rounded-full blur-3xl animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl animate-pulse-glow">
+        </div>
+        <div class="absolute top-1/2 -left-40 w-96 h-96 bg-cyan-600/15 rounded-full blur-3xl animate-pulse-glow"
+            style="animation-delay: 1.5s;"></div>
     </div>
 
     <!-- HEADER / NAVIGATION -->
     <header class="relative z-10 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
                     <i class="fa-solid fa-id-card text-white text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-display font-bold text-lg text-white leading-tight">CekAnggota<span class="text-brand-500">Online</span></h1>
+                    <h1 class="font-display font-bold text-lg text-white leading-tight">CekAnggota<span
+                            class="text-brand-500">Online</span></h1>
                     <p class="text-xs text-slate-400">Database Verifikasi Resmi</p>
                 </div>
             </div>
 
             <div class="flex items-center space-x-2">
-                <span id="syncStatusBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span id="syncStatusBadge"
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
                     <i class="fa-solid fa-file-excel mr-1 text-xs"></i> GSheet Sync Active
                 </span>
-                <button onclick="toggleAdminModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition duration-200">
+                <button onclick="toggleAdminModal()"
+                    class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition duration-200">
                     <i class="fa-solid fa-database mr-1"></i> Data Dummy
                 </button>
             </div>
@@ -99,114 +125,126 @@
 
         <!-- HERO & SEARCH SECTION -->
         <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
-            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4">
+            <div
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4">
                 <i class="fa-solid fa-shield-check mr-1.5"></i> Portal Verifikasi Keanggotaan Terpadu
             </div>
             <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-white tracking-tight leading-tight">
-                Cek Status Anggota & <br class="hidden sm:inline"><span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-cyan-300 to-emerald-400">Kartu Digital Resmi</span>
+                Cek Status Anggota <br class="hidden sm:inline"><span
+                    class="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-cyan-300 to-emerald-400">Kartu
+                    Digital Resmi</span>
             </h2>
             <p class="mt-3 text-slate-400 text-sm sm:text-base">
-                Ketik nama anggota di bawah untuk melakukan pengecekan real-time. Sistem akan menampilkan seluruh hasil pencarian parsial secara otomatis.
+                Ketik nama anggota di bawah untuk melakukan pengecekan real-time. Sistem akan menampilkan seluruh hasil
+                pencarian parsial secara otomatis.
             </p>
         </div>
 
         <!-- SEARCH INPUT BOX -->
         <div class="max-w-xl mx-auto w-full relative mb-10">
             <div class="relative group">
-                <div class="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-cyan-500 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
-                <div class="relative flex items-center bg-slate-900 rounded-2xl border border-slate-700 focus-within:border-brand-500 shadow-2xl overflow-hidden">
+                <div
+                    class="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-cyan-500 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500">
+                </div>
+                <div
+                    class="relative flex items-center bg-slate-900 rounded-2xl border border-slate-700 focus-within:border-brand-500 shadow-2xl overflow-hidden">
                     <div class="pl-4 text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-lg"></i>
                     </div>
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        placeholder="Ketik potongan nama (misal: Budi, Sari, Pratama)..." 
+                    <input type="text" id="searchInput"
+                        placeholder="Ketik potongan nama (misal: Budi, Sari, Pratama)..."
                         class="w-full bg-transparent text-white placeholder-slate-500 text-base py-4 px-3 focus:outline-none"
-                        oninput="handleSearchInput(this.value)"
-                        autocomplete="off"
-                    >
-                    <button 
-                        id="clearSearchBtn" 
-                        onclick="clearSearch()" 
-                        class="hidden text-slate-400 hover:text-white px-3 py-2 mr-1 transition"
-                        title="Bersihkan"
-                    >
+                        oninput="handleSearchInput(this.value)" autocomplete="off">
+                    <button id="clearSearchBtn" onclick="clearSearch()"
+                        class="hidden text-slate-400 hover:text-white px-3 py-2 mr-1 transition" title="Bersihkan">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             </div>
 
             <!-- SEARCH AUTOCOMPLETE DROPDOWN RESULTS -->
-            <div id="searchResults" class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-30 max-h-80 overflow-y-auto divide-y divide-slate-800">
+            <div id="searchResults"
+                class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-30 max-h-80 overflow-y-auto divide-y divide-slate-800">
                 <!-- Dynamic results inserted here -->
             </div>
         </div>
 
         <!-- RESULT SECTION CONTAINER -->
         <div id="resultContainer" class="hidden max-w-4xl mx-auto w-full">
-            
+
             <!-- WHEN NOT FOUND -->
             <div id="notFoundState" class="hidden glass-card rounded-2xl p-8 text-center max-w-md mx-auto">
-                <div class="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
+                <div
+                    class="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
                     <i class="fa-solid fa-user-xmark text-2xl"></i>
                 </div>
                 <h3 class="text-lg font-bold text-white mb-1">Data Tidak Ditemukan</h3>
                 <p class="text-sm text-slate-400 mb-4">
-                    Nama "<span id="searchedKeyword" class="text-amber-400 font-semibold"></span>" tidak terdaftar pada database Google Sheets kami.
+                    Nama "<span id="searchedKeyword" class="text-amber-400 font-semibold"></span>" tidak terdaftar pada
+                    database Google Sheets kami.
                 </p>
-                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                <div
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
                     <i class="fa-solid fa-circle-exclamation mr-1.5"></i> STATUS: BELUM TERDAFTAR
                 </div>
             </div>
 
             <!-- WHEN FOUND (VERIFIED DETAILS + DIGITAL ID CARD) -->
             <div id="foundState" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                
+
                 <!-- LEFT COLUMN: MEMBER DETAILS -->
                 <div class="lg:col-span-5 glass-card rounded-2xl p-6 sm:p-8 space-y-6">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Status Verifikasi</span>
-                        <span id="memberStatusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Status
+                            Verifikasi</span>
+                        <span id="memberStatusBadge"
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                             <i class="fa-solid fa-circle-check mr-1.5 text-emerald-400"></i> TERDAFTAR
                         </span>
                     </div>
 
                     <div class="space-y-4">
                         <div>
-                            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Nama Lengkap</label>
+                            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Nama
+                                Lengkap</label>
                             <p id="detailNama" class="text-xl font-bold text-white mt-0.5"></p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">ID Anggota</label>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">ID
+                                    Anggota</label>
                                 <p id="detailId" class="text-sm font-mono font-semibold text-brand-400 mt-0.5"></p>
                             </div>
                             <div>
-                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Masa Berlaku</label>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Masa
+                                    Berlaku</label>
                                 <p id="detailBerlaku" class="text-sm font-medium text-slate-200 mt-0.5"></p>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Divisi / Unit</label>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Divisi /
+                                    Unit</label>
                                 <p id="detailUnit" class="text-sm font-medium text-slate-200 mt-0.5"></p>
                             </div>
                             <div>
-                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Jabatan</label>
+                                <label
+                                    class="text-xs font-medium text-slate-400 uppercase tracking-wider">Jabatan</label>
                                 <p id="detailJabatan" class="text-sm font-medium text-slate-200 mt-0.5"></p>
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-2 flex flex-col gap-2">
-                        <button onclick="flipCard()" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-medium text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-brand-600/20">
+                        <button onclick="flipCard()"
+                            class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-medium text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-brand-600/20">
                             <i class="fa-solid fa-rotate text-xs"></i>
                             <span>Balik Tampilan Kartu (3D Flip)</span>
                         </button>
-                        <button onclick="downloadCardAlert()" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium text-sm border border-slate-700 transition flex items-center justify-center space-x-2">
+                        <button onclick="downloadCardAlert()"
+                            class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium text-sm border border-slate-700 transition flex items-center justify-center space-x-2">
                             <i class="fa-solid fa-download text-xs"></i>
                             <span>Simpan / Unduh Kartu</span>
                         </button>
@@ -218,29 +256,41 @@
                     <p class="text-xs text-slate-400 mb-3 flex items-center gap-1.5">
                         <i class="fa-solid fa-hand-pointer text-brand-400"></i> Klik kartu untuk memutar
                     </p>
-                    
-                    <div class="w-full max-w-md h-64 sm:h-72 perspective-1000 cursor-pointer group" onclick="flipCard()">
-                        <div id="interactiveCard" class="card-flip-inner relative w-full h-full transform-style-3d shadow-2xl rounded-2xl">
-                            
+
+                    <div class="w-full max-w-md h-64 sm:h-72 perspective-1000 cursor-pointer group"
+                        onclick="flipCard()">
+                        <div id="interactiveCard"
+                            class="card-flip-inner relative w-full h-full transform-style-3d shadow-2xl rounded-2xl">
+
                             <!-- CARD FRONT SIDE -->
-                            <div class="absolute inset-0 w-full h-full rounded-2xl p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-950 border border-slate-700/80 backface-hidden flex flex-col justify-between overflow-hidden shadow-2xl">
+                            <div
+                                class="absolute inset-0 w-full h-full rounded-2xl p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-950 border border-slate-700/80 backface-hidden flex flex-col justify-between overflow-hidden shadow-2xl">
                                 <!-- Decorative Graphic -->
-                                <div class="absolute -right-16 -top-16 w-48 h-48 bg-brand-500/10 rounded-full blur-2xl"></div>
-                                <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl"></div>
-                                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-b from-white/5 to-transparent transform rotate-45 pointer-events-none"></div>
+                                <div class="absolute -right-16 -top-16 w-48 h-48 bg-brand-500/10 rounded-full blur-2xl">
+                                </div>
+                                <div
+                                    class="absolute -left-16 -bottom-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl">
+                                </div>
+                                <div
+                                    class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-b from-white/5 to-transparent transform rotate-45 pointer-events-none">
+                                </div>
 
                                 <!-- Card Top Row -->
                                 <div class="flex items-center justify-between relative z-10">
                                     <div class="flex items-center space-x-2.5">
-                                        <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
                                             <i class="fa-solid fa-id-card"></i>
                                         </div>
                                         <div>
-                                            <p class="text-xs font-bold text-white tracking-widest uppercase font-display">KARTU ANGGOTA DIGITAL</p>
+                                            <p
+                                                class="text-xs font-bold text-white tracking-widest uppercase font-display">
+                                                KARTU ANGGOTA DIGITAL</p>
                                             <p class="text-[10px] text-slate-400">Resmi & Terverifikasi</p>
                                         </div>
                                     </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                                         VERIFIED
                                     </span>
                                 </div>
@@ -248,23 +298,29 @@
                                 <!-- Card Body Row (Photo + Info) -->
                                 <div class="flex items-center space-x-4 my-auto relative z-10">
                                     <div class="relative">
-                                        <img id="cardPhoto" src="" alt="Foto Anggota" class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border-2 border-brand-500/50 shadow-md">
-                                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] text-white" title="Terverifikasi">
+                                        <img id="cardPhoto" src="" alt="Foto Anggota"
+                                            class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border-2 border-brand-500/50 shadow-md">
+                                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] text-white"
+                                            title="Terverifikasi">
                                             <i class="fa-solid fa-check"></i>
                                         </div>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h4 id="cardNama" class="text-lg sm:text-xl font-bold text-white truncate font-display"></h4>
-                                        <p id="cardJabatan" class="text-xs text-slate-300 font-medium truncate mt-0.5"></p>
+                                        <h4 id="cardNama"
+                                            class="text-lg sm:text-xl font-bold text-white truncate font-display"></h4>
+                                        <p id="cardJabatan" class="text-xs text-slate-300 font-medium truncate mt-0.5">
+                                        </p>
                                         <div class="mt-2 flex items-center space-x-2">
-                                            <span id="cardId" class="text-xs font-mono bg-slate-950/60 px-2 py-1 rounded text-cyan-300 border border-slate-700"></span>
+                                            <span id="cardId"
+                                                class="text-xs font-mono bg-slate-950/60 px-2 py-1 rounded text-cyan-300 border border-slate-700"></span>
                                             <span id="cardUnit" class="text-[11px] text-slate-400 truncate"></span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Card Footer Row -->
-                                <div class="flex items-end justify-between border-t border-slate-800/80 pt-3 relative z-10 text-[10px] text-slate-400">
+                                <div
+                                    class="flex items-end justify-between border-t border-slate-800/80 pt-3 relative z-10 text-[10px] text-slate-400">
                                     <div>
                                         <span>Berlaku Hingga:</span>
                                         <p id="cardBerlaku" class="font-semibold text-slate-200 text-xs"></p>
@@ -276,28 +332,33 @@
                             </div>
 
                             <!-- CARD BACK SIDE -->
-                            <div class="absolute inset-0 w-full h-full rounded-2xl p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 border border-slate-700/80 backface-hidden rotate-y-180 flex flex-col justify-between overflow-hidden shadow-2xl">
+                            <div
+                                class="absolute inset-0 w-full h-full rounded-2xl p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 border border-slate-700/80 backface-hidden rotate-y-180 flex flex-col justify-between overflow-hidden shadow-2xl">
                                 <!-- Magnetic Strip Simulation -->
                                 <div class="h-10 bg-slate-950 -mx-6 -mt-1 border-y border-slate-800"></div>
 
                                 <div class="my-auto space-y-3 px-2">
                                     <div class="flex items-center justify-between">
-                                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">Syarat & Ketentuan</p>
+                                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">Syarat &
+                                            Ketentuan</p>
                                         <span class="text-[10px] text-slate-500">KODE SECURE: 8849-AF</span>
                                     </div>
                                     <p class="text-[10px] text-slate-400 leading-relaxed">
-                                        Kartu ini adalah bukti keanggotaan sah terdaftar. Wajib ditunjukkan saat melakukan verifikasi kegiatan atau layanan organisasi.
+                                        Kartu ini adalah bukti keanggotaan sah terdaftar. Wajib ditunjukkan saat
+                                        melakukan verifikasi kegiatan atau layanan organisasi.
                                     </p>
-                                    
+
                                     <!-- QR Code Simulation -->
                                     <div class="bg-white p-2 rounded-xl w-fit mx-auto flex items-center space-x-3">
-                                        <div class="w-16 h-16 bg-slate-900 rounded flex items-center justify-center text-white">
+                                        <div
+                                            class="w-16 h-16 bg-slate-900 rounded flex items-center justify-center text-white">
                                             <i class="fa-solid fa-qrcode text-3xl"></i>
                                         </div>
                                         <div class="text-left text-slate-800 pr-2">
                                             <p class="text-[10px] font-bold uppercase">Scan untuk Otentikasi</p>
                                             <p class="text-[9px] text-slate-500">Verified by GSheet API</p>
-                                            <p class="text-[9px] font-mono text-brand-600 font-bold mt-1" id="cardBackId"></p>
+                                            <p class="text-[9px] font-mono text-brand-600 font-bold mt-1"
+                                                id="cardBackId"></p>
                                         </div>
                                     </div>
                                 </div>
@@ -315,8 +376,10 @@
         </div>
 
         <!-- DUMMY DATA PREVIEW / ADMIN MODAL -->
-        <div id="adminModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
+        <div id="adminModal"
+            class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div
+                class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-800">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-file-excel text-emerald-400 text-xl"></i>
@@ -328,7 +391,8 @@
                 </div>
 
                 <div class="py-4 text-xs text-slate-400">
-                    Berikut data contoh (dummy) yang disinkronisasi dari Google Sheets untuk keperluan pengujian demo aplikasi:
+                    Berikut data contoh (dummy) yang disinkronisasi dari Google Sheets untuk keperluan pengujian demo
+                    aplikasi:
                 </div>
 
                 <div class="overflow-x-auto flex-1 border border-slate-800 rounded-xl">
@@ -350,7 +414,8 @@
                 </div>
 
                 <div class="pt-4 mt-2 flex justify-end">
-                    <button onclick="toggleAdminModal()" class="bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs py-2 px-4 rounded-xl">
+                    <button onclick="toggleAdminModal()"
+                        class="bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs py-2 px-4 rounded-xl">
                         Tutup Prediksi Data
                     </button>
                 </div>
@@ -362,7 +427,8 @@
     <!-- FOOTER -->
     <footer class="relative z-10 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
         <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>© 2026 Solusi Cek Data Anggota - Project Owner: <span class="text-slate-300 font-semibold">ellomaipauw</span></p>
+            <p>© 2026 Solusi Cek Data Anggota - Project Owner: <span
+                    class="text-slate-300 font-semibold">ellomaipauw</span></p>
             <p class="flex items-center space-x-2">
                 <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
                 <span>Powered by Google Sheets API & Tailwind CSS</span>
@@ -453,7 +519,7 @@
             }
 
             // Filter members matching partial input
-            const matches = DUMMY_MEMBERS.filter(member => 
+            const matches = DUMMY_MEMBERS.filter(member =>
                 member.nama.toLowerCase().includes(trimmed)
             );
 
@@ -592,4 +658,5 @@
         }
     </script>
 </body>
+
 </html>
