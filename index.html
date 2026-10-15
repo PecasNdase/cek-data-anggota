@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Verifikasi Anggota & Kartu Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        .card-flip-inner {
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .card-flipped {
+            transform: rotateY(180deg);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-100 antialiased bg-slate-950 selection:bg-brand-500 selection:text-white flex flex-col min-h-screen">
+
+    <!-- Background Decoration -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl animate-pulse-glow"></div>
+        <div class="absolute top-1/2 -left-40 w-96 h-96 bg-cyan-600/15 rounded-full blur-3xl animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+    </div>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="relative z-10 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-id-card text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-lg text-white leading-tight">CekAnggota<span class="text-brand-500">Online</span></h1>
+                    <p class="text-xs text-slate-400">Database Verifikasi Resmi</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <span id="syncStatusBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                    <i class="fa-solid fa-file-excel mr-1 text-xs"></i> GSheet Sync Active
+                </span>
+                <button onclick="toggleAdminModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition duration-200">
+                    <i class="fa-solid fa-database mr-1"></i> Data Dummy
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center">
+
+        <!-- HERO & SEARCH SECTION -->
+        <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+            <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20 mb-4">
+                <i class="fa-solid fa-shield-check mr-1.5"></i> Portal Verifikasi Keanggotaan Terpadu
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-white tracking-tight leading-tight">
+                Cek Status Anggota & <br class="hidden sm:inline"><span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-cyan-300 to-emerald-400">Kartu Digital Resmi</span>
+            </h2>
+            <p class="mt-3 text-slate-400 text-sm sm:text-base">
+                Ketik nama anggota di bawah untuk melakukan pengecekan real-time. Sistem akan menampilkan seluruh hasil pencarian parsial secara otomatis.
+            </p>
+        </div>
+
+        <!-- SEARCH INPUT BOX -->
+        <div class="max-w-xl mx-auto w-full relative mb-10">
+            <div class="relative group">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-cyan-500 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
+                <div class="relative flex items-center bg-slate-900 rounded-2xl border border-slate-700 focus-within:border-brand-500 shadow-2xl overflow-hidden">
+                    <div class="pl-4 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Ketik potongan nama (misal: Budi, Sari, Pratama)..." 
+                        class="w-full bg-transparent text-white placeholder-slate-500 text-base py-4 px-3 focus:outline-none"
+                        oninput="handleSearchInput(this.value)"
+                        autocomplete="off"
+                    >
+                    <button 
+                        id="clearSearchBtn" 
+                        onclick="clearSearch()" 
+                        class="hidden text-slate-400 hover:text-white px-3 py-2 mr-1 transition"
+                        title="Bersihkan"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SEARCH AUTOCOMPLETE DROPDOWN RESULTS -->
+            <div id="searchResults" class="hidden absolute left-0 right-0 top-full mt-2 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl z-30 max-h-80 overflow-y-auto divide-y divide-slate-800">
+                <!-- Dynamic results inserted here -->
+            </div>
+        </div>
+
+        <!-- RESULT SECTION CONTAINER -->
+        <div id="resultContainer" class="hidden max-w-4xl mx-auto w-full">
+            
+            <!-- WHEN NOT FOUND -->
+            <div id="notFoundState" class="hidden glass-card rounded-2xl p-8 text-center max-w-md mx-auto">
+                <div class="w-16 h-16 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
+                    <i class="fa-solid fa-user-xmark text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-1">Data Tidak Ditemukan</h3>
+                <p class="text-sm text-slate-400 mb-4">
+                    Nama "<span id="searchedKeyword" class="text-amber-400 font-semibold"></span>" tidak terdaftar pada database Google Sheets kami.
+                </p>
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                    <i class="fa-solid fa-circle-exclamation mr-1.5"></i> STATUS: BELUM TERDAFTAR
+                </div>
+            </div>
+
+            <!-- WHEN FOUND (VERIFIED DETAILS + DIGITAL ID CARD) -->
+            <div id="foundState" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- LEFT COLUMN: MEMBER DETAILS -->
+                <div class="lg:col-span-5 glass-card rounded-2xl p-6 sm:p-8 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Status Verifikasi</span>
+                        <span id="memberStatusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            <i class="fa-solid fa-circle-check mr-1.5 text-emerald-400"></i> TERDAFTAR
+                        </span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Nama Lengkap</label>
+                            <p id="detailNama" class="text-xl font-bold text-white mt-0.5"></p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">ID Anggota</label>
+                                <p id="detailId" class="text-sm font-mono font-semibold text-brand-400 mt-0.5"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Masa Berlaku</label>
+                                <p id="detailBerlaku" class="text-sm font-medium text-slate-200 mt-0.5"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Divisi / Unit</label>
+                                <p id="detailUnit" class="text-sm font-medium text-slate-200 mt-0.5"></p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-medium text-slate-400 uppercase tracking-wider">Jabatan</label>
+                                <p id="detailJabatan" class="text-sm font-medium text-slate-200 mt-0.5"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex flex-col gap-2">
+                        <button onclick="flipCard()" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-medium text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-brand-600/20">
+                            <i class="fa-solid fa-rotate text-xs"></i>
+                            <span>Balik Tampilan Kartu (3D Flip)</span>
+                        </button>
+                        <button onclick="downloadCardAlert()" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium text-sm border border-slate-700 transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-download text-xs"></i>
+                            <span>Simpan / Unduh Kartu</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: DIGITAL MEMBERSHIP CARD (3D FLIP CARD) -->
+                <div class="lg:col-span-7 flex flex-col items-center justify-center">
+                    <p class="text-xs text-slate-400 mb-3 flex items-center gap-1.5">
+                        <i class="fa-solid fa-hand-pointer text-brand-400"></i> Klik kartu untuk memutar
+                    </p>
+                    
+                    <div class="w-full max-w-md h-64 sm:h-72 perspective-1000 cursor-pointer group" onclick="flipCard()">
+                        <div id="interactiveCard" class="card-flip-inner relative w-full h-full transform-style-3d shadow-2xl rounded-2xl">
+                            
+                            <!-- CARD FRONT SIDE -->
+                            <div class="absolute inset-0 w-full h-full rounded-2xl p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-brand-950 border border-slate-700/80 backface-hidden flex flex-col justify-between overflow-hidden shadow-2xl">
+                                <!-- Decorative Graphic -->
+                                <div class="absolute -right-16 -top-16 w-48 h-48 bg-brand-500/10 rounded-full blur-2xl"></div>
+                                <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl"></div>
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-b from-white/5 to-transparent transform rotate-45 pointer-events-none"></div>
+
+                                <!-- Card Top Row -->
+                                <div class="flex items-center justify-between relative z-10">
+                                    <div class="flex items-center space-x-2.5">
+                                        <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                            <i class="fa-solid fa-id-card"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-white tracking-widest uppercase font-display">KARTU ANGGOTA DIGITAL</p>
+                                            <p class="text-[10px] text-slate-400">Resmi & Terverifikasi</p>
+                                        </div>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                        VERIFIED
+                                    </span>
+                                </div>
+
+                                <!-- Card Body Row (Photo + Info) -->
+                                <div class="flex items-center space-x-4 my-auto relative z-10">
+                                    <div class="relative">
+                                        <img id="cardPhoto" src="" alt="Foto Anggota" class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border-2 border-brand-500/50 shadow-md">
+                                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] text-white" title="Terverifikasi">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 id="cardNama" class="text-lg sm:text-xl font-bold text-white truncate font-display"></h4>
+                                        <p id="cardJabatan" class="text-xs text-slate-300 font-medium truncate mt-0.5"></p>
+                                        <div class="mt-2 flex items-center space-x-2">
+                                            <span id="cardId" class="text-xs font-mono bg-slate-950/60 px-2 py-1 rounded text-cyan-300 border border-slate-700"></span>
+                                            <span id="cardUnit" class="text-[11px] text-slate-400 truncate"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Footer Row -->
+                                <div class="flex items-end justify-between border-t border-slate-800/80 pt-3 relative z-10 text-[10px] text-slate-400">
+                                    <div>
+                                        <span>Berlaku Hingga:</span>
+                                        <p id="cardBerlaku" class="font-semibold text-slate-200 text-xs"></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <i class="fa-solid fa-qrcode text-xl text-slate-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CARD BACK SIDE -->
+                            <div class="absolute inset-0 w-full h-full rounded-2xl p-6 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 border border-slate-700/80 backface-hidden rotate-y-180 flex flex-col justify-between overflow-hidden shadow-2xl">
+                                <!-- Magnetic Strip Simulation -->
+                                <div class="h-10 bg-slate-950 -mx-6 -mt-1 border-y border-slate-800"></div>
+
+                                <div class="my-auto space-y-3 px-2">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">Syarat & Ketentuan</p>
+                                        <span class="text-[10px] text-slate-500">KODE SECURE: 8849-AF</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 leading-relaxed">
+                                        Kartu ini adalah bukti keanggotaan sah terdaftar. Wajib ditunjukkan saat melakukan verifikasi kegiatan atau layanan organisasi.
+                                    </p>
+                                    
+                                    <!-- QR Code Simulation -->
+                                    <div class="bg-white p-2 rounded-xl w-fit mx-auto flex items-center space-x-3">
+                                        <div class="w-16 h-16 bg-slate-900 rounded flex items-center justify-center text-white">
+                                            <i class="fa-solid fa-qrcode text-3xl"></i>
+                                        </div>
+                                        <div class="text-left text-slate-800 pr-2">
+                                            <p class="text-[10px] font-bold uppercase">Scan untuk Otentikasi</p>
+                                            <p class="text-[9px] text-slate-500">Verified by GSheet API</p>
+                                            <p class="text-[9px] font-mono text-brand-600 font-bold mt-1" id="cardBackId"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center text-[9px] text-slate-500 border-t border-slate-800/80 pt-2">
+                                    © 2026 Organization Digital Membership System
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DUMMY DATA PREVIEW / ADMIN MODAL -->
+        <div id="adminModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] flex flex-col">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-xl"></i>
+                        <h3 class="font-bold text-white text-lg">Database Google Sheets Dummy</h3>
+                    </div>
+                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="py-4 text-xs text-slate-400">
+                    Berikut data contoh (dummy) yang disinkronisasi dari Google Sheets untuk keperluan pengujian demo aplikasi:
+                </div>
+
+                <div class="overflow-x-auto flex-1 border border-slate-800 rounded-xl">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-800 text-slate-200 uppercase tracking-wider font-semibold">
+                            <tr>
+                                <th class="p-3">ID Anggota</th>
+                                <th class="p-3">Nama Lengkap</th>
+                                <th class="p-3">Divisi / Unit</th>
+                                <th class="p-3">Jabatan</th>
+                                <th class="p-3">Masa Berlaku</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dummyTableBody" class="divide-y divide-slate-800">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pt-4 mt-2 flex justify-end">
+                    <button onclick="toggleAdminModal()" class="bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs py-2 px-4 rounded-xl">
+                        Tutup Prediksi Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 Solusi Cek Data Anggota - Project Owner: <span class="text-slate-300 font-semibold">ellomaipauw</span></p>
+            <p class="flex items-center space-x-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Powered by Google Sheets API & Tailwind CSS</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // DUMMY DATABASE (Simulating Google Sheets API Data)
+        const DUMMY_MEMBERS = [
+            {
+                id: "ANG-2026-001",
+                nama: "Budi Pratama",
+                unit: "Teknologi Informasi",
+                jabatan: "Senior Developer",
+                berlaku: "31 Des 2027",
+                status: "TERDAFTAR",
+                foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
+            },
+            {
+                id: "ANG-2026-002",
+                nama: "Sari Dewi Kartika",
+                unit: "Sumber Daya Manusia",
+                jabatan: "HR Specialist",
+                berlaku: "15 Okt 2026",
+                status: "TERDAFTAR",
+                foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=300"
+            },
+            {
+                id: "ANG-2026-003",
+                nama: "Ahmad Rizky Pratama",
+                unit: "Pemasaran Digital",
+                jabatan: "Marketing Executive",
+                berlaku: "28 Feb 2028",
+                status: "TERDAFTAR",
+                foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"
+            },
+            {
+                id: "ANG-2026-004",
+                nama: "Dewi Lestari",
+                unit: "Keuangan & Akuntansi",
+                jabatan: "Finance Analyst",
+                berlaku: "30 Jun 2027",
+                status: "TERDAFTAR",
+                foto: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=300"
+            },
+            {
+                id: "ANG-2026-005",
+                nama: "Budi Santoso",
+                unit: "Operasional & Logistik",
+                jabatan: "Logistics Officer",
+                berlaku: "10 Jan 2027",
+                status: "TERDAFTAR",
+                foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300"
+            },
+            {
+                id: "ANG-2026-006",
+                nama: "Siti Rahmawati",
+                unit: "Hukum & Kepatuhan",
+                jabatan: "Legal Advisor",
+                berlaku: "20 Agu 2026",
+                status: "TERDAFTAR",
+                foto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300"
+            }
+        ];
+
+        let selectedMember = null;
+        let isFlipped = false;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDummyTable();
+        });
+
+        // Partial Search Handler
+        function handleSearchInput(query) {
+            const searchResultsDiv = document.getElementById('searchResults');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const trimmed = query.trim().toLowerCase();
+
+            if (trimmed.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+                searchResultsDiv.classList.add('hidden');
+                return;
+            }
+
+            // Filter members matching partial input
+            const matches = DUMMY_MEMBERS.filter(member => 
+                member.nama.toLowerCase().includes(trimmed)
+            );
+
+            if (matches.length > 0) {
+                searchResultsDiv.innerHTML = matches.map(m => `
+                    <div onclick="selectMember('${m.id}')" class="p-3.5 hover:bg-slate-800/80 cursor-pointer flex items-center justify-between transition group">
+                        <div class="flex items-center space-x-3">
+                            <img src="${m.foto}" class="w-9 h-9 rounded-full object-cover border border-slate-700">
+                            <div>
+                                <p class="text-sm font-semibold text-white group-hover:text-brand-400 transition">${highlightMatch(m.nama, trimmed)}</p>
+                                <p class="text-xs text-slate-400">${m.unit} • <span class="font-mono text-slate-300">${m.id}</span></p>
+                            </div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">TERDAFTAR</span>
+                    </div>
+                `).join('');
+                searchResultsDiv.classList.remove('hidden');
+            } else {
+                searchResultsDiv.innerHTML = `
+                    <div onclick="showNotFound('${escapeHtml(query)}')" class="p-4 text-center cursor-pointer hover:bg-slate-800/50">
+                        <p class="text-sm text-slate-300">Tidak ada nama yang cocok dengan "<span class="text-amber-400 font-semibold">${escapeHtml(query)}</span>"</p>
+                        <p class="text-xs text-slate-500 mt-1">Klik di sini untuk melihat status ketidaktersediaan</p>
+                    </div>
+                `;
+                searchResultsDiv.classList.remove('hidden');
+            }
+        }
+
+        // Highlight matching substrings
+        function highlightMatch(text, query) {
+            const index = text.toLowerCase().indexOf(query.toLowerCase());
+            if (index === -1) return escapeHtml(text);
+            const before = text.substring(0, index);
+            const match = text.substring(index, index + query.length);
+            const after = text.substring(index + query.length);
+            return `${escapeHtml(before)}<span class="text-brand-400 font-bold underline bg-brand-500/10 px-0.5 rounded">${escapeHtml(match)}</span>${escapeHtml(after)}`;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Select member from dropdown
+        function selectMember(id) {
+            const member = DUMMY_MEMBERS.find(m => m.id === id);
+            if (!member) return;
+
+            selectedMember = member;
+            document.getElementById('searchInput').value = member.nama;
+            document.getElementById('searchResults').classList.add('hidden');
+
+            // Populate UI details
+            document.getElementById('detailNama').textContent = member.nama;
+            document.getElementById('detailId').textContent = member.id;
+            document.getElementById('detailBerlaku').textContent = member.berlaku;
+            document.getElementById('detailUnit').textContent = member.unit;
+            document.getElementById('detailJabatan').textContent = member.jabatan;
+
+            // Populate Digital Card
+            document.getElementById('cardNama').textContent = member.nama;
+            document.getElementById('cardJabatan').textContent = member.jabatan;
+            document.getElementById('cardId').textContent = member.id;
+            document.getElementById('cardUnit').textContent = member.unit;
+            document.getElementById('cardBerlaku').textContent = member.berlaku;
+            document.getElementById('cardPhoto').src = member.foto;
+            document.getElementById('cardBackId').textContent = member.id;
+
+            // Display result states
+            document.getElementById('resultContainer').classList.remove('hidden');
+            document.getElementById('notFoundState').classList.add('hidden');
+            document.getElementById('foundState').classList.remove('hidden');
+
+            // Reset Card Flip State
+            isFlipped = false;
+            document.getElementById('interactiveCard').classList.remove('card-flipped');
+        }
+
+        // Show Not Found State
+        function showNotFound(query) {
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchedKeyword').textContent = query;
+            document.getElementById('resultContainer').classList.remove('hidden');
+            document.getElementById('foundState').classList.add('hidden');
+            document.getElementById('notFoundState').classList.remove('hidden');
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('resultContainer').classList.add('hidden');
+        }
+
+        // Card Flip animation handler
+        function flipCard() {
+            if (!selectedMember) return;
+            const card = document.getElementById('interactiveCard');
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                card.classList.add('card-flipped');
+            } else {
+                card.classList.remove('card-flipped');
+            }
+        }
+
+        // Admin / Dummy Data Modal Toggle
+        function toggleAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function renderDummyTable() {
+            const tbody = document.getElementById('dummyTableBody');
+            tbody.innerHTML = DUMMY_MEMBERS.map(m => `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono font-semibold text-brand-400">${m.id}</td>
+                    <td class="p-3 font-medium text-white">${m.nama}</td>
+                    <td class="p-3 text-slate-300">${m.unit}</td>
+                    <td class="p-3 text-slate-400">${m.jabatan}</td>
+                    <td class="p-3 text-slate-400">${m.berlaku}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold">${m.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function downloadCardAlert() {
+            if (!selectedMember) return;
+            // Simulated download
+            const link = document.createElement('a');
+            link.href = '#';
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-5 right-5 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl z-50 text-xs font-semibold flex items-center space-x-2';
+            notification.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>Kartu Digital ${selectedMember.nama} berhasil diunduh (Simulasi)!</span>`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
